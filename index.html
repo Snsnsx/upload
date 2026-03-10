@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сдача работ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Переменные ── */
+    :root {
+      --bg:        #0b0f1a;
+      --surface:   #131929;
+      --border:    #1e2d4a;
+      --accent:    #3b82f6;
+      --accent2:   #06b6d4;
+      --success:   #10b981;
+      --error:     #f43f5e;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Golos Text', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* Фоновая сетка */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Свечение вверху */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 400px;
+      background: radial-gradient(ellipse, rgba(59,130,246,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Карточка ── */
+    .card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px 44px 44px;
+      width: 100%;
+      max-width: 540px;
+      box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset;
+      animation: slideUp .5s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Шапка ── */
+    .header { margin-bottom: 36px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(59,130,246,.25);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 16px;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 8px var(--accent2);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: .4; }
+    }
+
+    h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: clamp(22px, 4vw, 28px);
+      font-weight: 900;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #e2e8f0 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── Форма ── */
+    .form { display: flex; flex-direction: column; gap: 20px; }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .field { display: flex; flex-direction: column; gap: 8px; }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: 'Golos Text', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+
+    input[type="text"]::placeholder { color: #334155; }
+
+    /* ── Зона перетаскивания ── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 36px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(59,130,246,.04);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+    }
+
+    .drop-icon {
+      width: 44px; height: 44px;
+      margin: 0 auto 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .drop-text { font-size: 14px; color: var(--text); font-weight: 500; }
+    .drop-hint { margin-top: 4px; font-size: 12px; color: var(--muted); }
+
+    /* ── Список файлов ── */
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .file-list::-webkit-scrollbar { width: 4px; }
+    .file-list::-webkit-scrollbar-track { background: transparent; }
+    .file-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      animation: fadeIn .2s ease both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.97); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .file-icon { font-size: 18px; flex-shrink: 0; }
+
+    .file-info { flex: 1; min-width: 0; }
+    .file-name {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-size { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .file-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: color .15s, background .15s;
+    }
+    .file-remove:hover { color: var(--error); background: rgba(244,63,94,.1); }
+
+    /* ── Кнопка ── */
+    .btn {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 15px 24px;
+      font-family: 'Unbounded', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(59,130,246,.4);
+    }
+
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-loader {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn.loading .btn-text { display: none; }
+    .btn.loading .btn-loader { display: block; }
+
+    /* ── Сообщения ── */
+    .message {
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+      animation: fadeIn .3s ease;
+    }
+
+    .message.success {
+      display: block;
+      background: rgba(16,185,129,.1);
+      border: 1px solid rgba(16,185,129,.3);
+      color: #6ee7b7;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(244,63,94,.1);
+      border: 1px solid rgba(244,63,94,.3);
+      color: #fda4af;
+    }
+
+    .message a {
+      color: inherit;
+      font-weight: 600;
+      text-underline-offset: 3px;
+    }
+
+    /* ── Прогресс ── */
+    .progress-wrap {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .progress-wrap.active { display: flex; }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 100px;
+      width: 0%;
+      transition: width .3s ease;
+    }
+
+    /* ── Разделитель ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 32px 24px; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="badge">Загрузка работ</div>
+    <h1>Сдача домашнего задания</h1>
+    <p class="subtitle">Заполни форму и прикрепи файлы — они сохранятся в папку на Google Drive.</p>
+  </div>
+
+  <div class="form">
+    <!-- Имя -->
+    <div class="row">
+      <div class="field">
+        <label>Фамилия</label>
+        <input type="text" id="lastName" placeholder="Иванов" autocomplete="family-name" />
+      </div>
+      <div class="field">
+        <label>Имя</label>
+        <input type="text" id="firstName" placeholder="Иван" autocomplete="given-name" />
+      </div>
+    </div>
+
+    <!-- Задание -->
+    <div class="field">
+      <label>Название задания</label>
+      <input type="text" id="taskName" placeholder="Практическая работа №1" />
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Зона загрузки -->
+    <div class="field">
+      <label>Файлы</label>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" multiple />
+        <div class="drop-icon">📂</div>
+        <div class="drop-text">Перетащи файлы или нажми сюда</div>
+        <div class="drop-hint">Любые форматы · До 25 МБ каждый</div>
+      </div>
+    </div>
+
+    <!-- Список файлов -->
+    <div class="file-list" id="fileList"></div>
+
+    <!-- Прогресс -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label">
+        <span id="progressLabel">Загрузка…</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <!-- Статус -->
+    <div class="message" id="message"></div>
+
+    <!-- Кнопка -->
+    <button class="btn" id="submitBtn" onclick="submitFiles()">
+      <span class="btn-text">Отправить работу</span>
+      <div class="btn-loader"></div>
+    </button>
+  </div>
+</div>
+
+<script>
+  // ▼ ВСТАВЬ СЮДА URL своего Google Apps Script Web App ▼
+  const SCRIPT_URL = "https://script.google.com/macros/s/ТВОЙ_ID/exec";
+
+  let selectedFiles = [];
+
+  // ── Drag & Drop ──────────────────────────────────────
+  const dropZone  = document.getElementById("dropZone");
+  const fileInput = document.getElementById("fileInput");
+
+  dropZone.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropZone.classList.add("drag-over");
+  });
+
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+
+  dropZone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropZone.classList.remove("drag-over");
+    addFiles([...e.dataTransfer.files]);
+  });
+
+  fileInput.addEventListener("change", () => {
+    addFiles([...fileInput.files]);
+    fileInput.value = "";
+  });
+
+  function addFiles(newFiles) {
+    const MAX_SIZE = 25 * 1024 * 1024;
+    newFiles.forEach(f => {
+      if (f.size > MAX_SIZE) {
+        showMessage(`Файл "${f.name}" слишком большой (>${Math.round(f.size/1024/1024)} МБ)`, "error");
+        return;
+      }
+      if (!selectedFiles.find(x => x.name === f.name && x.size === f.size)) {
+        selectedFiles.push(f);
+      }
+    });
+    renderFileList();
+  }
+
+  function removeFile(idx) {
+    selectedFiles.splice(idx, 1);
+    renderFileList();
+  }
+
+  function renderFileList() {
+    const list = document.getElementById("fileList");
+    list.innerHTML = "";
+    selectedFiles.forEach((f, i) => {
+      const ext  = f.name.split(".").pop().toLowerCase();
+      const icon = getIcon(ext);
+      const size = formatSize(f.size);
+      list.innerHTML += `
+        <div class="file-item">
+          <span class="file-icon">${icon}</span>
+          <div class="file-info">
+            <div class="file-name">${escHtml(f.name)}</div>
+            <div class="file-size">${size}</div>
+          </div>
+          <button class="file-remove" onclick="removeFile(${i})" title="Убрать">✕</button>
+        </div>`;
+    });
+  }
+
+  // ── Отправка ─────────────────────────────────────────
+  async function submitFiles() {
+    clearMessage();
+    const lastName  = document.getElementById("lastName").value.trim();
+    const firstName = document.getElementById("firstName").value.trim();
+    const taskName  = document.getElementById("taskName").value.trim() || "Задание";
+
+    if (!lastName || !firstName) {
+      showMessage("Пожалуйста, введи фамилию и имя.", "error"); return;
+    }
+    if (selectedFiles.length === 0) {
+      showMessage("Прикрепи хотя бы один файл.", "error"); return;
+    }
+
+    setLoading(true);
+    showProgress(true);
+
+    try {
+      // Конвертируем файлы в base64
+      const filesData = [];
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const f = selectedFiles[i];
+        updateProgress(
+          `Подготовка файла ${i + 1} из ${selectedFiles.length}…`,
+          Math.round((i / selectedFiles.length) * 50)
+        );
+        const base64 = await toBase64(f);
+        filesData.push({ name: f.name, base64, mimeType: f.type || "application/octet-stream" });
+      }
+
+      updateProgress("Отправка на сервер…", 70);
+
+      const body = new URLSearchParams({
+        lastName,
+        firstName,
+        taskName,
+        files: JSON.stringify(filesData)
+      });
+
+      const resp = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body,
+        redirect: "follow"
+      });
+
+      updateProgress("Обработка…", 90);
+
+      const data = await resp.json();
+      updateProgress("Готово!", 100);
+
+      if (data.ok) {
+        showMessage(
+          `✅ ${data.message}. <a href="${data.folder}" target="_blank">Открыть папку на Drive</a>`,
+          "success"
+        );
+        // Сбрасываем форму
+        selectedFiles = [];
+        renderFileList();
+        document.getElementById("lastName").value  = "";
+        document.getElementById("firstName").value = "";
+        document.getElementById("taskName").value  = "";
+      } else {
+        showMessage("❌ Ошибка: " + (data.error || "неизвестная ошибка"), "error");
+      }
+
+    } catch (err) {
+      showMessage("❌ Не удалось подключиться к серверу. Проверь интернет.", "error");
+      console.error(err);
+    }
+
+    setLoading(false);
+    setTimeout(() => showProgress(false), 1500);
+  }
+
+  // ── Утилиты ──────────────────────────────────────────
+  function toBase64(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload  = () => res(r.result.split(",")[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024)       return bytes + " Б";
+    if (bytes < 1024*1024)  return (bytes/1024).toFixed(1) + " КБ";
+    return (bytes/1024/1024).toFixed(1) + " МБ";
+  }
+
+  function getIcon(ext) {
+    const map = {
+      pdf:"📄", doc:"📝", docx:"📝", txt:"📄",
+      xls:"📊", xlsx:"📊", csv:"📊",
+      ppt:"📑", pptx:"📑",
+      jpg:"🖼️", jpeg:"🖼️", png:"🖼️", gif:"🖼️", svg:"🖼️",
+      zip:"📦", rar:"📦", "7z":"📦",
+      py:"🐍", js:"📜", html:"🌐", css:"🎨"
+    };
+    return map[ext] || "📎";
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function setLoading(on) {
+    const btn = document.getElementById("submitBtn");
+    btn.classList.toggle("loading", on);
+    btn.disabled = on;
+  }
+
+  function showProgress(on) {
+    document.getElementById("progressWrap").classList.toggle("active", on);
+    if (!on) updateProgress("", 0);
+  }
+
+  function updateProgress(label, pct) {
+    document.getElementById("progressLabel").textContent = label;
+    document.getElementById("progressPct").textContent   = pct + "%";
+    document.getElementById("progressFill").style.width  = pct + "%";
+  }
+
+  function showMessage(html, type) {
+    const el = document.getElementById("message");
+    el.innerHTML   = html;
+    el.className   = "message " + type;
+  }
+
+  function clearMessage() {
+    const el = document.getElementById("message");
+    el.innerHTML = "";
+    el.className = "message";
+  }
+</script>
+</body>
+</html>
