@@ -1,630 +1,508 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Сдача работ</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    /* ── Переменные ── */
-    :root {
-      --bg:        #0b0f1a;
-      --surface:   #131929;
-      --border:    #1e2d4a;
-      --accent:    #3b82f6;
-      --accent2:   #06b6d4;
-      --success:   #10b981;
-      --error:     #f43f5e;
-      --text:      #e2e8f0;
-      --muted:     #64748b;
-      --radius:    14px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code 128 Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Chakra+Petch:wght@300;400;600&display=swap');
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+–bg: #0a0a0f;
+–surface: #111118;
+–border: #1e1e2e;
+–accent: #00e5ff;
+–accent2: #ff2d78;
+–text: #e0e0f0;
+–muted: #555570;
+–bar-color: #f0f0ff;
+}
 
-    body {
-      font-family: 'Golos Text', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      overflow-x: hidden;
-    }
+- { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Фоновая сетка */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(59,130,246,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59,130,246,.04) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-    }
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Chakra Petch’, sans-serif;
+min-height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+}
 
-    /* Свечение вверху */
-    body::after {
-      content: '';
-      position: fixed;
-      top: -200px; left: 50%;
-      transform: translateX(-50%);
-      width: 700px; height: 400px;
-      background: radial-gradient(ellipse, rgba(59,130,246,.18) 0%, transparent 70%);
-      pointer-events: none;
-    }
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background:
+repeating-linear-gradient(0deg, transparent, transparent 39px, #1a1a2a 39px, #1a1a2a 40px),
+repeating-linear-gradient(90deg, transparent, transparent 39px, #1a1a2a 39px, #1a1a2a 40px);
+opacity: 0.3;
+pointer-events: none;
+z-index: 0;
+}
 
-    /* ── Карточка ── */
-    .card {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 48px 44px 44px;
-      width: 100%;
-      max-width: 540px;
-      box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset;
-      animation: slideUp .5s cubic-bezier(.16,1,.3,1) both;
-    }
+.glow-orb {
+position: fixed;
+border-radius: 50%;
+filter: blur(80px);
+pointer-events: none;
+z-index: 0;
+}
+.orb1 { width: 400px; height: 400px; background: rgba(0,229,255,0.04); top: -100px; left: -100px; }
+.orb2 { width: 300px; height: 300px; background: rgba(255,45,120,0.04); bottom: -80px; right: -80px; }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(32px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+.container {
+position: relative;
+z-index: 1;
+width: 640px;
+max-width: 95vw;
+}
 
-    /* ── Шапка ── */
-    .header { margin-bottom: 36px; }
+.header {
+margin-bottom: 40px;
+}
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(59,130,246,.12);
-      border: 1px solid rgba(59,130,246,.25);
-      border-radius: 100px;
-      padding: 4px 12px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--accent2);
-      margin-bottom: 16px;
-    }
+.label-tag {
+display: inline-block;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 10px;
+letter-spacing: 0.2em;
+color: var(–accent);
+background: rgba(0,229,255,0.06);
+border: 1px solid rgba(0,229,255,0.2);
+padding: 4px 10px;
+margin-bottom: 14px;
+}
 
-    .badge::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent2);
-      box-shadow: 0 0 8px var(--accent2);
-      animation: pulse 2s infinite;
-    }
+h1 {
+font-size: clamp(28px, 5vw, 42px);
+font-weight: 600;
+letter-spacing: 0.04em;
+line-height: 1;
+}
 
-    @keyframes pulse {
-      0%,100% { opacity: 1; } 50% { opacity: .4; }
-    }
+h1 span {
+color: var(–accent);
+}
 
-    h1 {
-      font-family: 'Unbounded', sans-serif;
-      font-size: clamp(22px, 4vw, 28px);
-      font-weight: 900;
-      line-height: 1.15;
-      background: linear-gradient(135deg, #e2e8f0 30%, var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+.subtitle {
+margin-top: 8px;
+font-size: 12px;
+letter-spacing: 0.1em;
+color: var(–muted);
+font-weight: 300;
+}
 
-    .subtitle {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
-    }
+.card {
+background: var(–surface);
+border: 1px solid var(–border);
+padding: 32px;
+position: relative;
+}
 
-    /* ── Форма ── */
-    .form { display: flex; flex-direction: column; gap: 20px; }
+.card::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 1px;
+background: linear-gradient(90deg, transparent, var(–accent), transparent);
+opacity: 0.6;
+}
 
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.input-row {
+display: flex;
+gap: 10px;
+margin-bottom: 28px;
+}
 
-    .field { display: flex; flex-direction: column; gap: 8px; }
+.text-input {
+flex: 1;
+background: #0d0d15;
+border: 1px solid var(–border);
+color: var(–text);
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 14px;
+padding: 12px 16px;
+outline: none;
+transition: border-color 0.2s;
+}
 
-    label {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+.text-input:focus {
+border-color: rgba(0,229,255,0.4);
+}
 
-    input[type="text"] {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 13px 16px;
-      color: var(--text);
-      font-family: 'Golos Text', sans-serif;
-      font-size: 15px;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
+.text-input::placeholder {
+color: var(–muted);
+}
 
-    input[type="text"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
-    }
+.btn {
+font-family: ‘Chakra Petch’, sans-serif;
+font-size: 11px;
+font-weight: 600;
+letter-spacing: 0.15em;
+padding: 12px 20px;
+border: none;
+cursor: pointer;
+transition: all 0.15s;
+text-transform: uppercase;
+white-space: nowrap;
+}
 
-    input[type="text"]::placeholder { color: #334155; }
+.btn-primary {
+background: var(–accent);
+color: #000;
+}
 
-    /* ── Зона перетаскивания ── */
-    .drop-zone {
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 36px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-      position: relative;
-    }
+.btn-primary:hover {
+background: #33ecff;
+box-shadow: 0 0 20px rgba(0,229,255,0.3);
+}
 
-    .drop-zone:hover, .drop-zone.drag-over {
-      border-color: var(--accent);
-      background: rgba(59,130,246,.04);
-    }
+.btn-primary:active {
+transform: scale(0.97);
+}
 
-    .drop-zone input[type="file"] {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      opacity: 0; cursor: pointer;
-    }
+.btn-secondary {
+background: transparent;
+color: var(–accent);
+border: 1px solid rgba(0,229,255,0.3);
+}
 
-    .drop-icon {
-      width: 44px; height: 44px;
-      margin: 0 auto 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
+.btn-secondary:hover {
+background: rgba(0,229,255,0.05);
+border-color: rgba(0,229,255,0.6);
+}
 
-    .drop-text { font-size: 14px; color: var(--text); font-weight: 500; }
-    .drop-hint { margin-top: 4px; font-size: 12px; color: var(--muted); }
+.btn-danger {
+background: transparent;
+color: var(–accent2);
+border: 1px solid rgba(255,45,120,0.3);
+padding: 6px 14px;
+font-size: 10px;
+}
 
-    /* ── Список файлов ── */
-    .file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
+.btn-danger:hover {
+background: rgba(255,45,120,0.05);
+border-color: rgba(255,45,120,0.6);
+}
 
-    .file-list::-webkit-scrollbar { width: 4px; }
-    .file-list::-webkit-scrollbar-track { background: transparent; }
-    .file-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.barcode-area {
+min-height: 120px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+background: #0d0d15;
+border: 1px solid var(–border);
+padding: 24px 20px 16px;
+position: relative;
+opacity: 0;
+transform: translateY(8px);
+transition: opacity 0.3s, transform 0.3s;
+}
 
-    .file-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      animation: fadeIn .2s ease both;
-    }
+.barcode-area.visible {
+opacity: 1;
+transform: translateY(0);
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(.97); }
-      to   { opacity: 1; transform: scale(1); }
-    }
+canvas {
+display: block;
+image-rendering: pixelated;
+max-width: 100%;
+}
 
-    .file-icon { font-size: 18px; flex-shrink: 0; }
+.barcode-text {
+margin-top: 10px;
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.15em;
+color: var(–muted);
+text-align: center;
+word-break: break-all;
+}
 
-    .file-info { flex: 1; min-width: 0; }
-    .file-name {
-      font-size: 13px;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .file-size { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.status-bar {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-top: 16px;
+min-height: 24px;
+}
 
-    .file-remove {
-      background: none;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 16px;
-      padding: 2px 6px;
-      border-radius: 6px;
-      transition: color .15s, background .15s;
-    }
-    .file-remove:hover { color: var(--error); background: rgba(244,63,94,.1); }
+.status-msg {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 11px;
+letter-spacing: 0.08em;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: opacity 0.3s;
+}
 
-    /* ── Кнопка ── */
-    .btn {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      padding: 15px 24px;
-      font-family: 'Unbounded', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .03em;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: transform .15s, box-shadow .15s, opacity .15s;
-    }
+.status-msg.ok { color: var(–accent); }
+.status-msg.err { color: var(–accent2); }
+.status-msg.idle { color: var(–muted); }
 
-    .btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(59,130,246,.4);
-    }
+.dot {
+width: 6px; height: 6px;
+border-radius: 50%;
+background: currentColor;
+animation: pulse 1.4s infinite;
+}
 
-    .btn:active:not(:disabled) { transform: translateY(0); }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.3; }
+}
 
-    .btn-loader {
-      display: none;
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-      margin: 0 auto;
-    }
+.corner {
+position: absolute;
+width: 10px; height: 10px;
+border-color: var(–accent);
+border-style: solid;
+opacity: 0.5;
+}
+.corner.tl { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
+.corner.tr { top: 6px; right: 6px; border-width: 1px 1px 0 0; }
+.corner.bl { bottom: 6px; left: 6px; border-width: 0 0 1px 1px; }
+.corner.br { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .btn.loading .btn-text { display: none; }
-    .btn.loading .btn-loader { display: block; }
+.download-row {
+margin-top: 12px;
+display: flex;
+justify-content: flex-end;
+gap: 8px;
+opacity: 0;
+transition: opacity 0.3s;
+}
+.download-row.visible { opacity: 1; }
+</style>
 
-    /* ── Сообщения ── */
-    .message {
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      font-size: 14px;
-      line-height: 1.5;
-      display: none;
-      animation: fadeIn .3s ease;
-    }
-
-    .message.success {
-      display: block;
-      background: rgba(16,185,129,.1);
-      border: 1px solid rgba(16,185,129,.3);
-      color: #6ee7b7;
-    }
-
-    .message.error {
-      display: block;
-      background: rgba(244,63,94,.1);
-      border: 1px solid rgba(244,63,94,.3);
-      color: #fda4af;
-    }
-
-    .message a {
-      color: inherit;
-      font-weight: 600;
-      text-underline-offset: 3px;
-    }
-
-    /* ── Прогресс ── */
-    .progress-wrap {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .progress-wrap.active { display: flex; }
-
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .progress-bar {
-      height: 4px;
-      background: var(--border);
-      border-radius: 100px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 100px;
-      width: 0%;
-      transition: width .3s ease;
-    }
-
-    /* ── Разделитель ── */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 4px 0;
-    }
-
-    @media (max-width: 480px) {
-      .card { padding: 32px 24px; }
-      .row { grid-template-columns: 1fr; }
-    }
-  </style>
 </head>
 <body>
 
-<div class="card">
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+
+<div class="container">
   <div class="header">
-    <div class="badge">Загрузка работ</div>
-    <h1>Сдача домашнего задания</h1>
-    <p class="subtitle">Заполни форму и прикрепи файлы — они сохранятся в папку на Google Drive.</p>
+    <div class="label-tag">BARCODE ENGINE v1.0</div>
+    <h1>CODE <span>128</span></h1>
+    <div class="subtitle">CLIPBOARD → BARCODE GENERATOR</div>
   </div>
 
-  <div class="form">
-    <!-- Имя -->
-    <div class="row">
-      <div class="field">
-        <label>Фамилия</label>
-        <input type="text" id="lastName" placeholder="Иванов" autocomplete="family-name" />
-      </div>
-      <div class="field">
-        <label>Имя</label>
-        <input type="text" id="firstName" placeholder="Иван" autocomplete="given-name" />
-      </div>
-    </div>
+  <div class="card">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
 
-    <!-- Задание -->
-    <div class="field">
-      <label>Название задания</label>
-      <input type="text" id="taskName" placeholder="Практическая работа №1" />
-    </div>
+```
+<div class="input-row">
+  <input class="text-input" id="inputText" placeholder="вставьте текст или считайте буфер…" type="text" />
+  <button class="btn btn-primary" id="pasteBtn">⌘ БУФЕР</button>
+  <button class="btn btn-secondary" id="genBtn">ГЕНЕРИРОВАТЬ</button>
+</div>
 
-    <div class="divider"></div>
+<div class="barcode-area" id="barcodeArea">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+  <canvas id="barcodeCanvas"></canvas>
+  <div class="barcode-text" id="barcodeLabel"></div>
+</div>
 
-    <!-- Зона загрузки -->
-    <div class="field">
-      <label>Файлы</label>
-      <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" multiple />
-        <div class="drop-icon">📂</div>
-        <div class="drop-text">Перетащи файлы или нажми сюда</div>
-        <div class="drop-hint">Любые форматы · До 25 МБ каждый</div>
-      </div>
-    </div>
+<div class="download-row" id="downloadRow">
+  <button class="btn btn-danger" id="downloadBtn">↓ PNG</button>
+</div>
 
-    <!-- Список файлов -->
-    <div class="file-list" id="fileList"></div>
+<div class="status-bar">
+  <div class="status-msg idle" id="statusMsg">
+    <span class="dot"></span>
+    <span id="statusText">ОЖИДАНИЕ ВВОДА</span>
+  </div>
+</div>
+```
 
-    <!-- Прогресс -->
-    <div class="progress-wrap" id="progressWrap">
-      <div class="progress-label">
-        <span id="progressLabel">Загрузка…</span>
-        <span id="progressPct">0%</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    </div>
-
-    <!-- Статус -->
-    <div class="message" id="message"></div>
-
-    <!-- Кнопка -->
-    <button class="btn" id="submitBtn" onclick="submitFiles()">
-      <span class="btn-text">Отправить работу</span>
-      <div class="btn-loader"></div>
-    </button>
   </div>
 </div>
 
 <script>
-  // ▼ ВСТАВЬ СЮДА URL своего Google Apps Script Web App ▼
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLzbZHTp6vgArPezgVRJmSuSDhIvdpg8OMiVfECsmVhAnHvuONAqGwVSc3KWGVUsoh/exec";
+// ── Code 128 encoder ──────────────────────────────────────────────────────────
 
-  let selectedFiles = [];
+const C128 = (() => {
+  // Each symbol: [bar widths as string "nnnnn" where n=1..4 bar width]
+  // Using standard Code 128 encoding table (start B, values 0-106 + stop)
+  // Patterns: 6 elements (3 bars, 3 spaces) as widths
+  const PATTERNS = [
+    "212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
+    "221312","231212","112232","122132","122231","113222","123122","123221","223211","221132",
+    "221231","213212","223112","312131","311222","321122","321221","312212","322112","322211",
+    "212123","212321","232121","111323","131123","131321","112313","132113","132311","211313",
+    "231113","231311","112133","112331","132131","113123","113321","133121","313121","211331",
+    "231131","213113","213311","213131","311123","311321","331121","312113","312311","332111",
+    "314111","221411","431111","111224","111422","121124","121421","141122","141221","112214",
+    "112412","122114","122411","142112","142211","241211","221114","413111","241112","134111",
+    "111242","121142","121241","114212","124112","124211","411212","421112","421211","212141",
+    "214121","412121","111143","111341","131141","114113","114311","411113","411311","113141",
+    "114131","311141","411131","b1a4a2","211412","211214","211232","2331112"
+  ];
 
-  // ── Drag & Drop ──────────────────────────────────────
-  const dropZone  = document.getElementById("dropZone");
-  const fileInput = document.getElementById("fileInput");
+  const START_B = 104;
+  const STOP    = 106;
 
-  dropZone.addEventListener("dragover", e => {
-    e.preventDefault();
-    dropZone.classList.add("drag-over");
-  });
-
-  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
-
-  dropZone.addEventListener("drop", e => {
-    e.preventDefault();
-    dropZone.classList.remove("drag-over");
-    addFiles([...e.dataTransfer.files]);
-  });
-
-  fileInput.addEventListener("change", () => {
-    addFiles([...fileInput.files]);
-    fileInput.value = "";
-  });
-
-  function addFiles(newFiles) {
-    const MAX_SIZE = 25 * 1024 * 1024;
-    newFiles.forEach(f => {
-      if (f.size > MAX_SIZE) {
-        showMessage(`Файл "${f.name}" слишком большой (>${Math.round(f.size/1024/1024)} МБ)`, "error");
-        return;
-      }
-      if (!selectedFiles.find(x => x.name === f.name && x.size === f.size)) {
-        selectedFiles.push(f);
-      }
-    });
-    renderFileList();
-  }
-
-  function removeFile(idx) {
-    selectedFiles.splice(idx, 1);
-    renderFileList();
-  }
-
-  function renderFileList() {
-    const list = document.getElementById("fileList");
-    list.innerHTML = "";
-    selectedFiles.forEach((f, i) => {
-      const ext  = f.name.split(".").pop().toLowerCase();
-      const icon = getIcon(ext);
-      const size = formatSize(f.size);
-      list.innerHTML += `
-        <div class="file-item">
-          <span class="file-icon">${icon}</span>
-          <div class="file-info">
-            <div class="file-name">${escHtml(f.name)}</div>
-            <div class="file-size">${size}</div>
-          </div>
-          <button class="file-remove" onclick="removeFile(${i})" title="Убрать">✕</button>
-        </div>`;
-    });
-  }
-
-  // ── Отправка ─────────────────────────────────────────
-  async function submitFiles() {
-    clearMessage();
-    const lastName  = document.getElementById("lastName").value.trim();
-    const firstName = document.getElementById("firstName").value.trim();
-    const taskName  = document.getElementById("taskName").value.trim() || "Задание";
-
-    if (!lastName || !firstName) {
-      showMessage("Пожалуйста, введи фамилию и имя.", "error"); return;
-    }
-    if (selectedFiles.length === 0) {
-      showMessage("Прикрепи хотя бы один файл.", "error"); return;
+  function encode(text) {
+    if (!text || text.length === 0) throw new Error("Пустая строка");
+    // Check all chars are in Code 128B range (32–126)
+    for (let i = 0; i < text.length; i++) {
+      const c = text.charCodeAt(i);
+      if (c < 32 || c > 126) throw new Error(`Символ вне диапазона Code 128: "${text[i]}" (0x${c.toString(16)})`);
     }
 
-    setLoading(true);
-    showProgress(true);
+    const codes = [];
+    codes.push(START_B); // Start B
 
-    try {
-      // Конвертируем файлы в base64
-      const filesData = [];
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const f = selectedFiles[i];
-        updateProgress(
-          `Подготовка файла ${i + 1} из ${selectedFiles.length}…`,
-          Math.round((i / selectedFiles.length) * 50)
-        );
-        const base64 = await toBase64(f);
-        filesData.push({ name: f.name, base64, mimeType: f.type || "application/octet-stream" });
-      }
-
-      updateProgress("Отправка на сервер…", 70);
-
-      const body = new URLSearchParams({
-        lastName,
-        firstName,
-        taskName,
-        files: JSON.stringify(filesData)
-      });
-
-      const resp = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body,
-        redirect: "follow"
-      });
-
-      updateProgress("Обработка…", 90);
-
-      const data = await resp.json();
-      updateProgress("Готово!", 100);
-
-      if (data.ok) {
-        showMessage(
-          `✅ ${data.message}. <a href="${data.folder}" target="_blank">Открыть папку на Drive</a>`,
-          "success"
-        );
-        // Сбрасываем форму
-        selectedFiles = [];
-        renderFileList();
-        document.getElementById("lastName").value  = "";
-        document.getElementById("firstName").value = "";
-        document.getElementById("taskName").value  = "";
-      } else {
-        showMessage("❌ Ошибка: " + (data.error || "неизвестная ошибка"), "error");
-      }
-
-    } catch (err) {
-      showMessage("❌ Не удалось подключиться к серверу. Проверь интернет.", "error");
-      console.error(err);
+    let checksum = START_B;
+    for (let i = 0; i < text.length; i++) {
+      const val = text.charCodeAt(i) - 32; // Code 128B: char 32 = value 0
+      codes.push(val);
+      checksum += val * (i + 1);
     }
+    codes.push(checksum % 103); // Check symbol
+    codes.push(STOP);
 
-    setLoading(false);
-    setTimeout(() => showProgress(false), 1500);
+    return codes;
   }
 
-  // ── Утилиты ──────────────────────────────────────────
-  function toBase64(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload  = () => res(r.result.split(",")[1]);
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
+  function getPattern(code) {
+    const p = PATTERNS[code];
+    if (!p) throw new Error("Неизвестный код: " + code);
+    return p;
   }
 
-  function formatSize(bytes) {
-    if (bytes < 1024)       return bytes + " Б";
-    if (bytes < 1024*1024)  return (bytes/1024).toFixed(1) + " КБ";
-    return (bytes/1024/1024).toFixed(1) + " МБ";
+  return { encode, getPattern };
+})();
+
+// ── Renderer ──────────────────────────────────────────────────────────────────
+
+function renderBarcode(text, canvas) {
+  const codes = C128.encode(text);
+
+  // Build bar/space sequence
+  // Pattern string: digits = bar widths alternating bar/space starting with bar
+  const modules = [];
+  for (const code of codes) {
+    const p = C128.getPattern(code);
+    for (let i = 0; i < p.length; i++) {
+      const w = parseInt(p[i]);
+      modules.push({ width: w, bar: i % 2 === 0 });
+    }
+  }
+  // Add termination bar (2 units) for stop pattern (already in last pattern as last element)
+  // Stop pattern ends with a 2-unit bar — covered by pattern "2331112"
+
+  const unitPx = 3;
+  const height = 80;
+  const quietZone = 10 * unitPx;
+
+  const totalWidth = modules.reduce((s, m) => s + m.width * unitPx, 0) + quietZone * 2;
+
+  canvas.width  = totalWidth;
+  canvas.height = height + 1;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bar-color').trim() || '#f0f0ff';
+
+  // Draw bars
+  let x = quietZone;
+  for (const m of modules) {
+    const w = m.width * unitPx;
+    if (m.bar) {
+      ctx.fillStyle = '#0a0a12';
+      ctx.fillRect(x, 0, w, height);
+    }
+    x += w;
   }
 
-  function getIcon(ext) {
-    const map = {
-      pdf:"📄", doc:"📝", docx:"📝", txt:"📄",
-      xls:"📊", xlsx:"📊", csv:"📊",
-      ppt:"📑", pptx:"📑",
-      jpg:"🖼️", jpeg:"🖼️", png:"🖼️", gif:"🖼️", svg:"🖼️",
-      zip:"📦", rar:"📦", "7z":"📦",
-      py:"🐍", js:"📜", html:"🌐", css:"🎨"
-    };
-    return map[ext] || "📎";
-  }
+  canvas.style.height = Math.min(height + 1, 100) + 'px';
+}
 
-  function escHtml(s) {
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  }
+// ── UI ────────────────────────────────────────────────────────────────────────
 
-  function setLoading(on) {
-    const btn = document.getElementById("submitBtn");
-    btn.classList.toggle("loading", on);
-    btn.disabled = on;
-  }
+const inputEl    = document.getElementById('inputText');
+const pasteBtn   = document.getElementById('pasteBtn');
+const genBtn     = document.getElementById('genBtn');
+const barcodeArea = document.getElementById('barcodeArea');
+const canvas     = document.getElementById('barcodeCanvas');
+const barcodeLabel = document.getElementById('barcodeLabel');
+const statusMsg  = document.getElementById('statusMsg');
+const statusText = document.getElementById('statusText');
+const downloadRow = document.getElementById('downloadRow');
+const downloadBtn = document.getElementById('downloadBtn');
 
-  function showProgress(on) {
-    document.getElementById("progressWrap").classList.toggle("active", on);
-    if (!on) updateProgress("", 0);
-  }
+function setStatus(type, text) {
+  statusMsg.className = 'status-msg ' + type;
+  statusText.textContent = text;
+}
 
-  function updateProgress(label, pct) {
-    document.getElementById("progressLabel").textContent = label;
-    document.getElementById("progressPct").textContent   = pct + "%";
-    document.getElementById("progressFill").style.width  = pct + "%";
+function generate(text) {
+  text = text.trim();
+  if (!text) {
+    setStatus('err', 'СТРОКА ПУСТА');
+    return;
   }
+  try {
+    renderBarcode(text, canvas);
+    barcodeLabel.textContent = text.length > 60 ? text.slice(0, 57) + '…' : text;
+    barcodeArea.classList.add('visible');
+    downloadRow.classList.add('visible');
+    setStatus('ok', `КОД СГЕНЕРИРОВАН · ${text.length} СИМ.`);
+  } catch(e) {
+    setStatus('err', e.message.toUpperCase());
+    barcodeArea.classList.remove('visible');
+    downloadRow.classList.remove('visible');
+  }
+}
 
-  function showMessage(html, type) {
-    const el = document.getElementById("message");
-    el.innerHTML   = html;
-    el.className   = "message " + type;
+pasteBtn.addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    inputEl.value = text;
+    generate(text);
+    setStatus('ok', `БУФЕР СЧИТАН · ${text.length} СИМ.`);
+  } catch(e) {
+    setStatus('err', 'НЕТ ДОСТУПА К БУФЕРУ — ВСТАВЬТЕ ВРУЧНУЮ');
   }
+});
 
-  function clearMessage() {
-    const el = document.getElementById("message");
-    el.innerHTML = "";
-    el.className = "message";
-  }
+genBtn.addEventListener('click', () => {
+  generate(inputEl.value);
+});
+
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') generate(inputEl.value);
+});
+
+downloadBtn.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'barcode_code128.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+// Auto-generate on paste into input
+inputEl.addEventListener('paste', (e) => {
+  setTimeout(() => generate(inputEl.value), 10);
+});
 </script>
+
 </body>
 </html>
