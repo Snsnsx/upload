@@ -2,7 +2,10 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Code 128 Generator</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Chakra+Petch:wght@300;400;600&display=swap');
@@ -18,17 +21,22 @@
     --bar-color: #f0f0ff;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+  }
 
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Chakra Petch', sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    flex-direction: column;
+    padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    overflow-x: hidden;
   }
 
   body::before {
@@ -46,50 +54,61 @@
   .glow-orb {
     position: fixed;
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(60px);
     pointer-events: none;
     z-index: 0;
   }
-  .orb1 { width: 400px; height: 400px; background: rgba(0,229,255,0.04); top: -100px; left: -100px; }
-  .orb2 { width: 300px; height: 300px; background: rgba(255,45,120,0.04); bottom: -80px; right: -80px; }
+  .orb1 { width: 300px; height: 300px; background: rgba(0,229,255,0.04); top: -80px; left: -80px; }
+  .orb2 { width: 220px; height: 220px; background: rgba(255,45,120,0.04); bottom: -60px; right: -60px; }
 
   .container {
     position: relative;
     z-index: 1;
-    width: 640px;
-    max-width: 95vw;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 32px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 500px) {
+    .container { padding: 40px 24px 48px; }
   }
 
   .header {
-    margin-bottom: 40px;
+    margin-bottom: 28px;
+  }
+
+  @media (min-width: 500px) {
+    .header { margin-bottom: 40px; }
   }
 
   .label-tag {
     display: inline-block;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.2em;
     color: var(--accent);
     background: rgba(0,229,255,0.06);
     border: 1px solid rgba(0,229,255,0.2);
-    padding: 4px 10px;
-    margin-bottom: 14px;
+    padding: 3px 8px;
+    margin-bottom: 10px;
   }
 
   h1 {
-    font-size: clamp(28px, 5vw, 42px);
+    font-size: clamp(26px, 8vw, 42px);
     font-weight: 600;
     letter-spacing: 0.04em;
     line-height: 1;
   }
 
-  h1 span {
-    color: var(--accent);
-  }
+  h1 span { color: var(--accent); }
 
   .subtitle {
-    margin-top: 8px;
-    font-size: 12px;
+    margin-top: 6px;
+    font-size: 11px;
     letter-spacing: 0.1em;
     color: var(--muted);
     font-weight: 300;
@@ -98,8 +117,15 @@
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 32px;
+    padding: 20px 16px;
     position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 500px) {
+    .card { padding: 32px; }
   }
 
   .card::before {
@@ -109,153 +135,6 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
     opacity: 0.6;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 28px;
-  }
-
-  .text-input {
-    flex: 1;
-    background: #0d0d15;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    padding: 12px 16px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .text-input:focus {
-    border-color: rgba(0,229,255,0.4);
-  }
-
-  .text-input::placeholder {
-    color: var(--muted);
-  }
-
-  .btn {
-    font-family: 'Chakra Petch', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    padding: 12px 20px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #000;
-  }
-
-  .btn-primary:hover {
-    background: #33ecff;
-    box-shadow: 0 0 20px rgba(0,229,255,0.3);
-  }
-
-  .btn-primary:active {
-    transform: scale(0.97);
-  }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid rgba(0,229,255,0.3);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(0,229,255,0.05);
-    border-color: rgba(0,229,255,0.6);
-  }
-
-  .btn-danger {
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid rgba(255,45,120,0.3);
-    padding: 6px 14px;
-    font-size: 10px;
-  }
-
-  .btn-danger:hover {
-    background: rgba(255,45,120,0.05);
-    border-color: rgba(255,45,120,0.6);
-  }
-
-  .barcode-area {
-    min-height: 120px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #ffffff;
-    border: 1px solid var(--border);
-    padding: 24px 20px 16px;
-    position: relative;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.3s, transform 0.3s;
-  }
-
-  .barcode-area.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  canvas {
-    display: block;
-    image-rendering: pixelated;
-    max-width: 100%;
-  }
-
-  .barcode-text {
-    margin-top: 10px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-align: center;
-    word-break: break-all;
-  }
-
-  .status-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 16px;
-    min-height: 24px;
-  }
-
-  .status-msg {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: opacity 0.3s;
-  }
-
-  .status-msg.ok { color: var(--accent); }
-  .status-msg.err { color: var(--accent2); }
-  .status-msg.idle { color: var(--muted); }
-
-  .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    animation: pulse 1.4s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
   }
 
   .corner {
@@ -270,8 +149,169 @@
   .corner.bl { bottom: 6px; left: 6px; border-width: 0 0 1px 1px; }
   .corner.br { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
 
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .text-input {
+    flex: 1;
+    min-width: 0;
+    background: #0d0d15;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    padding: 14px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    border-radius: 0;
+    min-height: 48px;
+  }
+
+  .text-input:focus {
+    border-color: rgba(0,229,255,0.4);
+  }
+
+  .text-input::placeholder {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .btn {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    padding: 14px 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    white-space: nowrap;
+    min-height: 48px;
+    min-width: 48px;
+    border-radius: 0;
+    -webkit-appearance: none;
+    touch-action: manipulation;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .btn-primary:active {
+    background: #33ecff;
+    transform: scale(0.96);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid rgba(0,229,255,0.3);
+  }
+
+  .btn-secondary:active {
+    background: rgba(0,229,255,0.08);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid rgba(255,45,120,0.3);
+    padding: 10px 16px;
+    font-size: 11px;
+    min-height: 40px;
+    touch-action: manipulation;
+  }
+
+  .btn-danger:active {
+    background: rgba(255,45,120,0.08);
+    transform: scale(0.97);
+  }
+
+  .barcode-area {
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    padding: 20px 12px 12px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .barcode-area.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  canvas {
+    display: block;
+    image-rendering: pixelated;
+    max-width: 100%;
+    height: auto !important;
+  }
+
+  .barcode-text {
+    margin-top: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: #666;
+    text-align: center;
+    word-break: break-all;
+    padding: 0 4px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    min-height: 24px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .status-msg {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.3s;
+  }
+
+  .status-msg.ok  { color: var(--accent); }
+  .status-msg.err { color: var(--accent2); }
+  .status-msg.idle { color: var(--muted); }
+
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.4s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
   .download-row {
-    margin-top: 12px;
+    margin-top: 10px;
     display: flex;
     justify-content: flex-end;
     gap: 8px;
@@ -300,8 +340,8 @@
     <div class="corner br"></div>
 
     <div class="input-row">
-      <input class="text-input" id="inputText" placeholder="вставьте текст или считайте буфер…" type="text" />
-      <button class="btn btn-primary" id="pasteBtn">⌘+V</button>
+      <input class="text-input" id="inputText" placeholder="вставьте текст…" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <button class="btn btn-primary" id="pasteBtn" title="Вставить из буфера">⌘V</button>
       <button class="btn btn-secondary" id="genBtn">GEN</button>
     </div>
 
@@ -328,12 +368,7 @@
 </div>
 
 <script>
-// ── Code 128 encoder ──────────────────────────────────────────────────────────
-
 const C128 = (() => {
-  // Each symbol: [bar widths as string "nnnnn" where n=1..4 bar width]
-  // Using standard Code 128 encoding table (start B, values 0-106 + stop)
-  // Patterns: 6 elements (3 bars, 3 spaces) as widths
   const PATTERNS = [
     "212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
     "221312","231212","112232","122132","122231","113222","123122","123221","223211","221132",
@@ -347,17 +382,12 @@ const C128 = (() => {
     "214121","412121","111143","111341","131141","114113","114311","411113","411311","113141",
     "114131","311141","411131","211412","211214","211232","2331112"
   ];
+  const START_A = 103, STOP = 106;
 
-  const START_A = 103;
-  const STOP    = 106;
-
-  // Code 128A character set:
-  // Values 0–63  → ASCII 32–95  (space, !"#$%&'()*+,-./0-9:;<=>?@A-Z[\]^_)
-  // Values 64–95 → ASCII 0–31   (NUL, SOH, STX … US — control characters)
   function charToA(ch) {
     const c = ch.charCodeAt(0);
-    if (c >= 32 && c <= 95) return c - 32;       // printable + uppercase
-    if (c >= 0  && c <= 31) return c + 64;        // control characters
+    if (c >= 32 && c <= 95) return c - 32;
+    if (c >= 0  && c <= 31) return c + 64;
     return null;
   }
 
@@ -365,12 +395,9 @@ const C128 = (() => {
     if (!text || text.length === 0) throw new Error("Пустая строка");
     for (let i = 0; i < text.length; i++) {
       if (charToA(text[i]) === null)
-        throw new Error(`Символ вне диапазона Code 128A: "${text[i]}" (0x${text.charCodeAt(i).toString(16).toUpperCase()}) — допустимы ASCII 0–95`);
+        throw new Error(`Символ вне Code 128A: "${text[i]}" (0x${text.charCodeAt(i).toString(16).toUpperCase()})`);
     }
-
-    const codes = [];
-    codes.push(START_A);
-
+    const codes = [START_A];
     let checksum = START_A;
     for (let i = 0; i < text.length; i++) {
       const val = charToA(text[i]);
@@ -379,7 +406,6 @@ const C128 = (() => {
     }
     codes.push(checksum % 103);
     codes.push(STOP);
-
     return codes;
   }
 
@@ -392,40 +418,31 @@ const C128 = (() => {
   return { encode, getPattern };
 })();
 
-// ── Renderer ──────────────────────────────────────────────────────────────────
-
 function renderBarcode(text, canvas) {
   const codes = C128.encode(text);
-
-  // Build bar/space sequence
-  // Pattern string: digits = bar widths alternating bar/space starting with bar
   const modules = [];
   for (const code of codes) {
     const p = C128.getPattern(code);
     for (let i = 0; i < p.length; i++) {
-      const w = parseInt(p[i]);
-      modules.push({ width: w, bar: i % 2 === 0 });
+      modules.push({ width: parseInt(p[i]), bar: i % 2 === 0 });
     }
   }
-  // Add termination bar (2 units) for stop pattern (already in last pattern as last element)
-  // Stop pattern ends with a 2-unit bar — covered by pattern "2331112"
 
-  const unitPx = 3;
-  const height = 80;
-  const quietZone = 10 * unitPx;
-
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const unitPx = 2;
+  const height = 72;
+  const quietZone = 8 * unitPx;
   const totalWidth = modules.reduce((s, m) => s + m.width * unitPx, 0) + quietZone * 2;
 
-  canvas.width  = totalWidth;
-  canvas.height = height + 1;
+  canvas.width  = totalWidth * dpr;
+  canvas.height = (height + 1) * dpr;
+  canvas.style.width  = totalWidth + 'px';
+  canvas.style.height = (height + 1) + 'px';
 
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, totalWidth, height + 1);
 
-  // Background
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bar-color').trim() || '#f0f0ff';
-
-  // Draw bars
   let x = quietZone;
   for (const m of modules) {
     const w = m.width * unitPx;
@@ -435,20 +452,16 @@ function renderBarcode(text, canvas) {
     }
     x += w;
   }
-
-  canvas.style.height = Math.min(height + 1, 100) + 'px';
 }
 
-// ── UI ────────────────────────────────────────────────────────────────────────
-
-const inputEl    = document.getElementById('inputText');
-const pasteBtn   = document.getElementById('pasteBtn');
-const genBtn     = document.getElementById('genBtn');
+const inputEl     = document.getElementById('inputText');
+const pasteBtn    = document.getElementById('pasteBtn');
+const genBtn      = document.getElementById('genBtn');
 const barcodeArea = document.getElementById('barcodeArea');
-const canvas     = document.getElementById('barcodeCanvas');
+const canvas      = document.getElementById('barcodeCanvas');
 const barcodeLabel = document.getElementById('barcodeLabel');
-const statusMsg  = document.getElementById('statusMsg');
-const statusText = document.getElementById('statusText');
+const statusMsg   = document.getElementById('statusMsg');
+const statusText  = document.getElementById('statusText');
 const downloadRow = document.getElementById('downloadRow');
 const downloadBtn = document.getElementById('downloadBtn');
 
@@ -459,13 +472,10 @@ function setStatus(type, text) {
 
 function generate(text) {
   text = text.trim();
-  if (!text) {
-    setStatus('err', 'СТРОКА ПУСТА');
-    return;
-  }
+  if (!text) { setStatus('err', 'СТРОКА ПУСТА'); return; }
   try {
     renderBarcode(text, canvas);
-    barcodeLabel.textContent = text.length > 60 ? text.slice(0, 57) + '…' : text;
+    barcodeLabel.textContent = text.length > 50 ? text.slice(0, 47) + '…' : text;
     barcodeArea.classList.add('visible');
     downloadRow.classList.add('visible');
     setStatus('ok', `КОД СГЕНЕРИРОВАН · ${text.length} СИМ.`);
@@ -487,24 +497,15 @@ pasteBtn.addEventListener('click', async () => {
   }
 });
 
-genBtn.addEventListener('click', () => {
-  generate(inputEl.value);
-});
-
-inputEl.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') generate(inputEl.value);
-});
+genBtn.addEventListener('click', () => generate(inputEl.value));
+inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') generate(inputEl.value); });
+inputEl.addEventListener('paste', () => setTimeout(() => generate(inputEl.value), 10));
 
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = 'barcode_code128.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
-});
-
-// Auto-generate on paste into input
-inputEl.addEventListener('paste', (e) => {
-  setTimeout(() => generate(inputEl.value), 10);
 });
 </script>
 </body>
